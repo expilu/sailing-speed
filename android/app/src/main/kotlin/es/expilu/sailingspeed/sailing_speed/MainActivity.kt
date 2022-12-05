@@ -1,4 +1,4 @@
-package es.expilu.sailingspeed.sailing_speed
+package es.expilu.sailingspeed
 
 import io.flutter.embedding.android.FlutterActivity
 

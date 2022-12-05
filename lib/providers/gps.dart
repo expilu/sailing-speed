@@ -114,3 +114,15 @@ final providerSpeedKnots = Provider.autoDispose<double?>((ref) {
 
   return speed;
 });
+
+/// Provides the current speed in Km/h, when available
+final providerSpeedKmh = Provider.autoDispose<int?>((ref) {
+  double? speedMs = ref.watch(providerSpeed);
+  int? speedKmh;
+
+  if (speedMs != null) {
+    speedKmh = SpeedUtils.toKmh(speedMs);
+  }
+
+  return speedKmh;
+});

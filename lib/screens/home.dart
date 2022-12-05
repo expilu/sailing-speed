@@ -11,7 +11,7 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       body: Stack(
         children: [
-          Center(child: Text('${ref.watch(providerSpeedKnots) ?? '-'}')),
+          Center(child: Text('${ref.watch(providerSpeedKmh) ?? '-'}')),
           const Positioned(bottom: 0.0, child: DebugGpsStatus()),
         ],
       ),

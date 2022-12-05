@@ -19,6 +19,8 @@ class DebugGpsStatus extends ConsumerWidget {
           error: (error, st) => 'error',
         );
 
+    final positionFix = ref.watch(providerGpsPositionFix);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -26,6 +28,15 @@ class DebugGpsStatus extends ConsumerWidget {
         Text('Location permission: $locationPermissionStatus'),
         Text(
             'Has location permission: ${(ref.watch(providerHasLocationPermission).asData?.value ?? false) ? 'yes' : 'no'}'),
+        Text('Latitude: ${positionFix?.latitude ?? '-'}'),
+        Text('Longitude: ${positionFix?.longitude ?? '-'}'),
+        Text('Location accuracy: ${positionFix?.accuracy ?? '-'}'),
+        Text('Speed: ${positionFix?.speed ?? '-'}'),
+        Text('Speed accuracy: ${positionFix?.speedAccuracy ?? '-'}'),
+        Text('Heading: ${positionFix?.heading ?? '-'}'),
+        Text('Altitude: ${positionFix?.altitude ?? '-'}'),
+        Text(
+            'Mocked: ${positionFix != null ? (positionFix.isMocked ? 'yes' : 'no') : '-'}'),
       ],
     );
   }

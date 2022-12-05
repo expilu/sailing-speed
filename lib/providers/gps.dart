@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -28,6 +30,7 @@ final providerLocationPermission = FutureProvider((ref) async {
   }
 });
 
+/// Provides if the app can use GPS
 final providerHasLocationPermission = FutureProvider((ref) async {
   final locationPermission = await ref.watch(providerLocationPermission.future);
 
@@ -40,4 +43,24 @@ final providerHasLocationPermission = FutureProvider((ref) async {
     case LocationPermission.always:
       return true;
   }
+});
+
+/// Listens to GPS position fixes and provides them. Position fixes include
+/// speed and heading
+final providerGpsPositionFix = Provider.autoDispose<Position?>((ref) {
+  final hasLocationPermission =
+      ref.watch(providerHasLocationPermission).asData?.value ?? false;
+
+  StreamSubscription<Position>? positionStream;
+
+  if (hasLocationPermission) {
+    positionStream = Geolocator.getPositionStream(
+        locationSettings: const LocationSettings(
+      accuracy: LocationAccuracy.bestForNavigation,
+    )).listen((position) => ref.state = position);
+  }
+
+  ref.onDispose(() => positionStream?.cancel());
+
+  return null;
 });

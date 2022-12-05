@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sailing_speed/design/theme.dart';
 import 'package:sailing_speed/screens/home.dart';
 
 class App extends StatelessWidget {
@@ -11,9 +12,7 @@ class App extends StatelessWidget {
     return ProviderScope(
       child: MaterialApp(
         title: 'Sailing Speed',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
+        theme: theme,
         home: const HomeScreen(),
       ),
     );

@@ -60,6 +60,23 @@ final providerLocationAccuracy = FutureProvider.autoDispose((ref) async {
   }
 });
 
+/// Provides updates on the current status of the GPS service
+final providerGpsServiceStatus = Provider.autoDispose<ServiceStatus?>((ref) {
+  final hasLocationPermission =
+      ref.watch(providerHasLocationPermission).asData?.value ?? false;
+
+  StreamSubscription<ServiceStatus>? statusStream;
+
+  if (hasLocationPermission) {
+    statusStream = Geolocator.getServiceStatusStream()
+        .listen((status) => ref.state = status);
+  }
+
+  ref.onDispose(() => statusStream?.cancel());
+
+  return null;
+});
+
 /// Listens to GPS position fixes and provides them. Position fixes include
 /// speed and heading
 final providerGpsPositionFix = Provider.autoDispose<Position?>((ref) {
@@ -89,13 +106,23 @@ final providerGpsPositionFix = Provider.autoDispose<Position?>((ref) {
   if (hasLocationPermission) {
     positionStream =
         Geolocator.getPositionStream(locationSettings: locationSettings)
-            .listen((position) {
-      ref.state = position;
-      debugPrint('Location: ${position.timestamp?.toIso8601String() ?? '-'}');
-    });
+            .listen((position) => ref.state = position);
   }
 
   ref.onDispose(() => positionStream?.cancel());
+
+  return null;
+});
+
+/// Provides the time passed between GPS fixes
+final providerGpsUpdateInterval = Provider.autoDispose<Duration?>((ref) {
+  ref.listen(providerGpsPositionFix, (previous, next) {
+    if (previous?.timestamp != null && next?.timestamp != null) {
+      ref.state = next!.timestamp!.difference(previous!.timestamp!);
+    } else {
+      ref.state = null;
+    }
+  });
 
   return null;
 });

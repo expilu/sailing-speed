@@ -28,6 +28,10 @@ class DebugGpsStatus extends ConsumerWidget {
         Text('Location permission: $locationPermissionStatus'),
         Text(
             'Has location permission: ${(ref.watch(providerHasLocationPermission).asData?.value ?? false) ? 'yes' : 'no'}'),
+        Text(
+            'Last service status change: ${ref.watch(providerGpsServiceStatus)?.name ?? '-'}'),
+        Text(
+            'Interval: ${ref.watch(providerGpsUpdateInterval)?.inMilliseconds ?? '-'}'),
         Text('Latitude: ${positionFix?.latitude ?? '-'}'),
         Text('Longitude: ${positionFix?.longitude ?? '-'}'),
         Text('Location accuracy: ${positionFix?.accuracy ?? '-'}'),

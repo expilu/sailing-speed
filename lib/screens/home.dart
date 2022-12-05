@@ -9,10 +9,10 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: [
-          Text('${ref.watch(providerSpeedKnots) ?? '-'}'),
-          const DebugGpsStatus(),
+          Center(child: Text('${ref.watch(providerSpeedKnots) ?? '-'}')),
+          const Positioned(bottom: 0.0, child: DebugGpsStatus()),
         ],
       ),
     );

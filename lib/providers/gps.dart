@@ -71,8 +71,10 @@ final providerGpsPositionFix = Provider.autoDispose<Position?>((ref) {
   late LocationSettings locationSettings;
 
   if (defaultTargetPlatform == TargetPlatform.android) {
-    locationSettings =
-        AndroidSettings(accuracy: LocationAccuracy.bestForNavigation);
+    locationSettings = AndroidSettings(
+      accuracy: LocationAccuracy.bestForNavigation,
+      intervalDuration: const Duration(milliseconds: 100),
+    );
   } else if (defaultTargetPlatform == TargetPlatform.iOS) {
     locationSettings = AppleSettings(
       accuracy: LocationAccuracy.bestForNavigation,
@@ -87,7 +89,10 @@ final providerGpsPositionFix = Provider.autoDispose<Position?>((ref) {
   if (hasLocationPermission) {
     positionStream =
         Geolocator.getPositionStream(locationSettings: locationSettings)
-            .listen((position) => ref.state = position);
+            .listen((position) {
+      ref.state = position;
+      debugPrint('Location: ${position.timestamp?.toIso8601String() ?? '-'}');
+    });
   }
 
   ref.onDispose(() => positionStream?.cancel());

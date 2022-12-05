@@ -32,6 +32,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_riverpod: 2.1.1
+  geolocator: 9.0.2
 
 dev_dependencies:
   # The "flutter_lints" package below contains a set of recommended lints to

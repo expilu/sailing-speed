@@ -1,16 +1,18 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:sailing_speed/utils/speed.dart';
 
 /// Provides if location services are enabled in the device so the app is able
 /// to use GPS
 final providerLocationEnabled =
-    FutureProvider((ref) => Geolocator.isLocationServiceEnabled());
+    FutureProvider.autoDispose((ref) => Geolocator.isLocationServiceEnabled());
 
 /// Provides if the app has permissions to use location services.
 /// If permission is denied, it will ask the user for it
-final providerLocationPermission = FutureProvider((ref) async {
+final providerLocationPermission = FutureProvider.autoDispose((ref) async {
   final locationEnabled = await ref.watch(providerLocationEnabled.future);
 
   if (locationEnabled) {
@@ -31,7 +33,7 @@ final providerLocationPermission = FutureProvider((ref) async {
 });
 
 /// Provides if the app can use GPS
-final providerHasLocationPermission = FutureProvider((ref) async {
+final providerHasLocationPermission = FutureProvider.autoDispose((ref) async {
   final locationPermission = await ref.watch(providerLocationPermission.future);
 
   switch (locationPermission) {
@@ -45,6 +47,19 @@ final providerHasLocationPermission = FutureProvider((ref) async {
   }
 });
 
+/// Provides the enabled accuracy for GPS services. Mainly to react to having
+/// reduced accuracy to inform the user to change settings to precise accuracy
+final providerLocationAccuracy = FutureProvider.autoDispose((ref) async {
+  final hasLocationPermission =
+      await ref.watch(providerHasLocationPermission.future);
+
+  if (hasLocationPermission) {
+    return await Geolocator.getLocationAccuracy();
+  } else {
+    return LocationAccuracyStatus.unknown;
+  }
+});
+
 /// Listens to GPS position fixes and provides them. Position fixes include
 /// speed and heading
 final providerGpsPositionFix = Provider.autoDispose<Position?>((ref) {
@@ -53,14 +68,44 @@ final providerGpsPositionFix = Provider.autoDispose<Position?>((ref) {
 
   StreamSubscription<Position>? positionStream;
 
-  if (hasLocationPermission) {
-    positionStream = Geolocator.getPositionStream(
-        locationSettings: const LocationSettings(
+  late LocationSettings locationSettings;
+
+  if (defaultTargetPlatform == TargetPlatform.android) {
+    locationSettings =
+        AndroidSettings(accuracy: LocationAccuracy.bestForNavigation);
+  } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+    locationSettings = AppleSettings(
       accuracy: LocationAccuracy.bestForNavigation,
-    )).listen((position) => ref.state = position);
+      activityType: ActivityType.otherNavigation,
+      pauseLocationUpdatesAutomatically: false,
+    );
+  } else {
+    locationSettings =
+        const LocationSettings(accuracy: LocationAccuracy.bestForNavigation);
+  }
+
+  if (hasLocationPermission) {
+    positionStream =
+        Geolocator.getPositionStream(locationSettings: locationSettings)
+            .listen((position) => ref.state = position);
   }
 
   ref.onDispose(() => positionStream?.cancel());
 
   return null;
+});
+
+/// Provides the current speed in m/s, when available
+final providerSpeed =
+    Provider.autoDispose((ref) => ref.watch(providerGpsPositionFix)?.speed);
+
+/// Provides the current speed in knots, when available
+final providerSpeedKnots = Provider.autoDispose<double?>((ref) {
+  double? speed = ref.watch(providerSpeed);
+
+  if (speed != null) {
+    speed = SpeedUtils.toKnots(speed);
+  }
+
+  return speed;
 });

@@ -31,6 +31,8 @@ class DebugGpsStatus extends ConsumerWidget {
         Text('Latitude: ${positionFix?.latitude ?? '-'}'),
         Text('Longitude: ${positionFix?.longitude ?? '-'}'),
         Text('Location accuracy: ${positionFix?.accuracy ?? '-'}'),
+        Text(
+            'Location accuracy status: ${ref.watch(providerLocationAccuracy).asData?.value.name ?? '-'}'),
         Text('Speed: ${positionFix?.speed ?? '-'}'),
         Text('Speed accuracy: ${positionFix?.speedAccuracy ?? '-'}'),
         Text('Heading: ${positionFix?.heading ?? '-'}'),

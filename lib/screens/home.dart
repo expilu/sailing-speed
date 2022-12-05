@@ -8,10 +8,13 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final a = ref.watch(providerLocationEnabled);
-
-    return const Scaffold(
-      body: DebugGpsStatus(),
+    return Scaffold(
+      body: Column(
+        children: [
+          Text('${ref.watch(providerSpeedKnots) ?? '-'}'),
+          const DebugGpsStatus(),
+        ],
+      ),
     );
   }
 }
